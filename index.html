@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>대구·경북 부동산 오늘 핵심 5選</title>
+  <style>
+    :root {
+      --primary: #0f172a;
+      --point: #2563eb;
+      --airport: #0284c7;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", Roboto, sans-serif; }
+    body { background-color: var(--bg); padding: 24px 16px; color: var(--text); }
+    .wrapper { max-width: 1160px; margin: 0 auto; }
+    
+    .header-area { margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .header-area h2 { font-size: 20px; font-weight: 800; color: var(--primary); }
+    .header-area span { font-size: 12px; color: var(--text-muted); }
+
+    .top-opinion-banner {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 6px solid var(--point);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    }
+    .top-opinion-banner h3 {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: var(--point);
+      margin-bottom: 4px;
+    }
+    .top-opinion-banner p {
+      font-size: 12.5px;
+      color: #334155;
+      line-height: 1.55;
+      word-break: keep-all;
+    }
+
+    .card-slider {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 16px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    .card-slider::-webkit-scrollbar { height: 6px; }
+    .card-slider::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    .card {
+      width: 360px;
+      height: 360px;
+      flex-shrink: 0;
+      scroll-snap-align: start;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease;
+    }
+    .card:hover { transform: translateY(-3px); }
+
+    .card-img-box {
+      width: 100%;
+      height: 165px;
+      position: relative;
+      overflow: hidden;
+      background-color: #0f172a;
+    }
+    .card-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+    .badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      color: #ffffff;
+      backdrop-filter: blur(4px);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      z-index: 2;
+    }
+
+    .card-content {
+      padding: 12px 14px 10px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 195px;
+    }
+    .card-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      line-height: 1.35;
+      color: var(--primary);
+      margin-bottom: 5px;
+      word-break: keep-all;
+    }
+    .summary-box {
+      background: #f8fafc;
+      border: 1px solid #edf2f7;
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 11px;
+      line-height: 1.45;
+      color: #334155;
+      flex-grow: 1;
+      overflow: hidden;
+      word-break: keep-all;
+    }
+    .summary-box ul { list-style: none; margin-bottom: 3px; }
+    .summary-box li { position: relative; padding-left: 8px; margin-bottom: 2px; font-weight: 700; color: #0f172a; }
+    .summary-box li::before { content: "•"; position: absolute; left: 0; color: var(--point); }
+    .summary-box p { color: #475569; font-size: 10.5px; line-height: 1.4; }
+
+    .card-footer {
+      font-size: 10px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding-top: 5px;
+      margin-top: 4px;
+    }
+    .pub-date {
+      color: #2563eb;
+      font-weight: 600;
+      background: #eff6ff;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .airport-summary-banner {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 6px solid var(--airport);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-top: 20px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    }
+    .airport-summary-banner h3 {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: var(--airport);
+      margin-bottom: 6px;
+    }
+    .airport-summary-banner .opinion-text {
+      font-size: 12.5px;
+      color: #0f172a;
+      line-height: 1.6;
+      font-weight: 600;
+      margin-bottom: 10px;
+      word-break: keep-all;
+    }
+    .airport-status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: #f8fafc;
+      border: 1px solid #edf2f7;
+      border-radius: 10px;
+      padding: 12px;
+    }
+    @media (max-width: 768px) {
+      .airport-status-grid { grid-template-columns: 1fr; }
+    }
+    .airport-status-item h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    .airport-status-item p {
+      font-size: 11.5px;
+      color: #475569;
+      line-height: 1.5;
+      word-break: keep-all;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+  <div class="header-area">
+    <h2>대구·경북 부동산 오늘 핵심 5選</h2>
+    <span>매일 아침 07:00 자동 브리핑</span>
+  </div>
+
+  <div class="top-opinion-banner">
+    <h3>📊 부동산 시황 한 줄 총평</h3>
+    <p>대구 아파트 분양가가 한 달 새 급락하며 5대 광역시와 다른 이례적 하락세를 보이는 등 지역 부동산 시장의 가격 조정이 깊어지고 있습니다.</p>
+  </div>
+
+  <div class="card-slider">
+    
+    <div class="card">
+      <div class="card-img-box">
+        <img src="[https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80)" alt="대구 분양가 한 달 만에 205만 원 급락했어요">
+        <span class="badge">TOP 1 · 공급 통계</span>
+      </div>
+      <div class="card-content">
+        <div class="card-title">대구 분양가 한 달 만에 205만 원 급락했어요</div>
+        <div class="summary-box">
+          <ul>
+            <li>대구 아파트 분양가 3.3㎡당 한 달 새 약 205만 원 급락</li>
+            <li>다른 5대 광역시의 분양가 상승 흐름과 상반된 이례적 변동</li>
+          </ul>
+          <p>미분양 적체와 매수 심리 위축이 길어지면서 건설사들이 분양가를 하향 조정하고 있습니다.
+수요 기반이 회복되지 않는 한 당분간 대구 분양 시장의 가격 조정세가 지속될 것으로 보입니다.</p>
+        </div>
+        <div class="card-footer">
+          <span>대구경북 팩트체크</span>
+          <span class="pub-date">발행: 2026.09.20 10:00</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-img-box">
+        <img src="[https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800&q=80)" alt="서울 전세 10억 육박, 수도권과의 격차 더 벌어져요">
+        <span class="badge">TOP 2 · 시장 격차</span>
+      </div>
+      <div class="card-content">
+        <div class="card-title">서울 전세 10억 육박, 수도권과의 격차 더 벌어져요</div>
+        <div class="summary-box">
+          <ul>
+            <li>서울 외곽 지역 아파트 평균 전셋값 10억 원 육박하며 역대 최고 기록</li>
+            <li>수도권 상승세 대비 대구·경북 매매·전세시장 약세로 지역 간 양극화 심화</li>
+          </ul>
+          <p>수도권은 실거주 수요와 공급 부족이 맞물려 전셋값이 강세를 이어가고 있습니다.
+반면 지방은 입주 물량 부담과 거래 절벽으로 양극화 현상이 더욱 뚜렷해지는 모양새입니다.</p>
+        </div>
+        <div class="card-footer">
+          <span>대구경북 팩트체크</span>
+          <span class="pub-date">발행: 2026.09.20 11:30</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-img-box">
+        <img src="[https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80)" alt="문경 유스호스텔 소송 승소로 지역 개발 물꼬 터졌어요">
+        <span class="badge">TOP 3 · 경북 시황</span>
+      </div>
+      <div class="card-content">
+        <div class="card-title">문경 유스호스텔 소송 승소로 지역 개발 물꼬 터졌어요</div>
+        <div class="summary-box">
+          <ul>
+            <li>문경시, 구 문경새재유스호스텔 명도소송 1심 승소 판결</li>
+            <li>장기간 방치된 대형 숙박 시설 정상화 및 활용 방안 본격 검토</li>
+          </ul>
+          <p>오랫동안 법적 분쟁에 묶여 있던 유휴 자산의 방치 문제가 해소될 발판이 마련되었습니다.
+문경새재 일대 관광 인프라 재정비를 통해 경북 북부권 부동산 유동성 및 상권 활성화가 기대됩니다.</p>
+        </div>
+        <div class="card-footer">
+          <span>대구경북 팩트체크</span>
+          <span class="pub-date">발행: 2026.09.20 13:00</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-img-box">
+        <img src="[https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=800&q=80)" alt="대구 군부대 이전, 기부대양여 성공 과제 떠올랐어요">
+        <span class="badge">TOP 4 · 정비사업</span>
+      </div>
+      <div class="card-content">
+        <div class="card-title">대구 군부대 이전, 기부대양여 성공 과제 떠올랐어요</div>
+        <div class="summary-box">
+          <ul>
+            <li>대구시 군부대 이전 기부대양여 방식 추진에 따른 성공 조건 논의 가열</li>
+            <li>부동산 경기 침체기 속 대규모 후적지 개발 사업성 확보가 핵심 과제</li>
+          </ul>
+          <p>부동산 시장 경색으로 기존 기부대양여 방식만으로는 사업비 조달에 어려움이 예상됩니다.
+성공적인 후적지 개발과 개발 이익 확보를 위해 정부 차원의 파격적인 지원책 마련이 요구됩니다.</p>
+        </div>
+        <div class="card-footer">
+          <span>대구경북 팩트체크</span>
+          <span class="pub-date">발행: 2026.09.20 15:00</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-img-box">
+        <img src="[https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80)" alt="TK 패싱 논란 속 의성 공항 배후 산업 육성 박차 가해요">
+        <span class="badge">TOP 5 · 신공항·배후지</span>
+      </div>
+      <div class="card-content">
+        <div class="card-title">TK 패싱 논란 속 의성 공항 배후 산업 육성 박차 가해요</div>
+        <div class="summary-box">
+          <ul>
+            <li>TK신공항 관련 예산 지원 촉구 등 지역 정치권 대응 강화</li>
+            <li>의성군, 공항 배후지 세포배양 등 바이오 산업 경쟁력 홍보 박차</li>
+          </ul>
+          <p>신공항 예산 확보를 둘러싼 정치권 공방 속에서도 배후도시의 산업기반 조성이 추진 중입니다.
+신공항 인프라와 연계된 바이오·물류 배후 단지 형성이 향후 경북권 가치 상승을 이끌 전망입니다.</p>
+        </div>
+        <div class="card-footer">
+          <span>대구경북 팩트체크</span>
+          <span class="pub-date">발행: 2026.09.20 16:30</span>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  <div class="airport-summary-banner">
+    <h3>✈️ 대구경북통합신공항 한 줄 총평</h3>
+    <p class="opinion-text">"TK신공항 및 군부대 이전 사업의 기부대양여 방식에 대한 우려 속에 정치권의 국비 지원 촉구와 배후 산업단지 조성이 동시에 추진되고 있습니다."</p>
+    <div class="airport-status-grid">
+      <div class="airport-status-item">
+        <h4>📌 현재 진행 상황 (Fact)</h4>
+        <p>대구 군부대 이전 및 신공항 사업이 기부대양여 방식으로 추진 중이나 부동산 경기 침체로 인한 자금 조달 우려가 지속되고 있습니다.</p>
+      </div>
+      <div class="airport-status-item">
+        <h4>🔮 향후 예상 (Forecast)</h4>
+        <p>지역 정치권의 공동 대응을 통한 국비 직접 지원 확보 여부에 따라 사업 추진 속도 및 배후도시 개발 성패가 갈릴 것으로 예상됩니다.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
