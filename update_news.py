@@ -14,34 +14,35 @@ if not GEMINI_API_KEY:
 
 genai.configure(api_key=GEMINI_API_KEY)
 
-# [수정] 내 계정에서 지원하는 최신 모델 자동 탐색
+# [수정] 내 계정에서 지원하는 최신 모델 자동 탐색 및 우선순위 지정
 available_models = [
     m.name for m in genai.list_models()
     if 'generateContent' in m.supported_generation_methods
 ]
 print("현재 내 계정에서 사용 가능한 모델 목록:", available_models)
 
-# 우선순위: 2.0-flash -> 2.5-flash -> flash 계열 -> 지원 모델 중 첫 번째
-selected_model = None
+# 구글 권장 최신 모델(3.6-flash) 최우선 배치
 priority_list = [
-    "models/gemini-2.0-flash",
-    "models/gemini-2.5-flash",
-    "models/gemini-1.5-flash-latest",
-    "models/gemini-1.5-flash"
+    "models/gemini-3.6-flash",
+    "models/gemini-3.5-flash",
+    "models/gemini-flash-latest",
+    "models/gemini-3.1-flash-lite",
+    "models/gemini-2.5-flash-lite"
 ]
 
+selected_model = None
 for candidate in priority_list:
     if candidate in available_models:
         selected_model = candidate
         break
 
+# 목록에 없을 경우 지원 모델 중 'flash' 단어가 포함된 첫 번째 모델 자동 지정
 if not selected_model:
     flash_models = [m for m in available_models if "flash" in m]
     selected_model = flash_models[0] if flash_models else available_models[0]
 
 print(f"최종 연결된 모델: {selected_model}")
 model = genai.GenerativeModel(selected_model)
-
 # 2. 최근 24시간 뉴스 RSS 수집 함수
 def fetch_google_news(query, limit=5):
     encoded_query = urllib.parse.quote(query)
