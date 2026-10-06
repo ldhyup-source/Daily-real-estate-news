@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import re
 import urllib.parse
@@ -8,9 +9,10 @@ import time
 import requests
 
 # 1. Gemini API 초기화
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+GEMINI_API_KEY = (os.environ.get("GEMINI_API_KEY") or "").strip()
 if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY 환경변수가 설정되지 않았습니다.")
+    print("오류: GEMINI_API_KEY 가 비어 있습니다. 저장소 Settings → Secrets → Actions 와 워크플로 env 를 확인하세요.")
+    sys.exit(1)
 
 # google.generativeai 라이브러리는 'AQ.' 로 시작하는 새 형식 키를 OAuth 토큰으로 오해해
 # 401(ACCESS_TOKEN_TYPE_UNSUPPORTED)을 냅니다. 지원도 끝났으므로 REST 로 직접 부릅니다.
@@ -50,10 +52,18 @@ def api_generate(model_name, prompt, tries=4):
 
 
 # [수정] 내 계정에서 지원하는 최신 모델 자동 탐색 및 우선순위 지정
-available_models = [
-    m["name"] for m in api_get("models", {"pageSize": 200}).get("models", [])
-    if "generateContent" in m.get("supportedGenerationMethods", [])
-]
+try:
+    available_models = [
+        m["name"] for m in api_get("models", {"pageSize": 200}).get("models", [])
+        if "generateContent" in m.get("supportedGenerationMethods", [])
+    ]
+except requests.HTTPError as e:
+    code = e.response.status_code if e.response is not None else "?"
+    print(f"오류: 모델 목록 조회 실패 (HTTP {code}). 401/403 이면 키가 잘못됐거나 권한이 없습니다.")
+    sys.exit(1)
+except requests.RequestException as e:
+    print("오류: 모델 목록 조회 중 네트워크 오류:", type(e).__name__)
+    sys.exit(1)
 print("현재 내 계정에서 사용 가능한 모델 목록:", available_models)
 
 # 구글 권장 최신 모델(3.6-flash) 최우선 배치
