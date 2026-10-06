@@ -17,14 +17,14 @@ jobs:
       - name: 저장소 체크아웃
         uses: actions/checkout@v4
 
-      - name: 파이썬 3.10 설정
+      - name: 파이썬 3.12 설정
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12'
 
       - name: 필수 패키지 설치
         run: |
-          pip install requests google-generativeai
+          pip install requests
 
       - name: 뉴스 수집 및 HTML 생성 스크립트 실행
         env:
