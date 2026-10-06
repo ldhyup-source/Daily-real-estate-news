@@ -4,20 +4,55 @@ import re
 import urllib.parse
 import xml.etree.ElementTree as ET
 from datetime import datetime
+import time
 import requests
-import google.generativeai as genai
 
 # 1. Gemini API 초기화
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY 환경변수가 설정되지 않았습니다.")
 
-genai.configure(api_key=GEMINI_API_KEY)
+# google.generativeai 라이브러리는 'AQ.' 로 시작하는 새 형식 키를 OAuth 토큰으로 오해해
+# 401(ACCESS_TOKEN_TYPE_UNSUPPORTED)을 냅니다. 지원도 끝났으므로 REST 로 직접 부릅니다.
+API_ROOT = "https://generativelanguage.googleapis.com/v1beta"
+
+
+def api_get(path, params=None):
+    p = {"key": GEMINI_API_KEY}
+    p.update(params or {})
+    r = requests.get(f"{API_ROOT}/{path}", params=p, timeout=60)
+    r.raise_for_status()
+    return r.json()
+
+
+def api_generate(model_name, prompt, tries=4):
+    """generateContent 호출. 혼잡(429·503)이면 잠시 쉬고 다시 시도."""
+    last = None
+    for i in range(tries):
+        r = requests.post(
+            f"{API_ROOT}/{model_name}:generateContent",
+            params={"key": GEMINI_API_KEY},
+            json={"contents": [{"parts": [{"text": prompt}]}]},
+            timeout=240,
+        )
+        if r.status_code in (429, 500, 503):
+            last = f"HTTP {r.status_code}"
+            time.sleep(5 * (i + 1))
+            continue
+        r.raise_for_status()
+        d = r.json()
+        parts = (d.get("candidates") or [{}])[0].get("content", {}).get("parts", [])
+        text = "".join(x.get("text", "") for x in parts).strip()
+        if not text:
+            raise RuntimeError("모델이 빈 답을 돌려줬습니다: " + json.dumps(d, ensure_ascii=False)[:300])
+        return text
+    raise RuntimeError(f"모델 호출 실패 ({last})")
+
 
 # [수정] 내 계정에서 지원하는 최신 모델 자동 탐색 및 우선순위 지정
 available_models = [
-    m.name for m in genai.list_models()
-    if 'generateContent' in m.supported_generation_methods
+    m["name"] for m in api_get("models", {"pageSize": 200}).get("models", [])
+    if "generateContent" in m.get("supportedGenerationMethods", [])
 ]
 print("현재 내 계정에서 사용 가능한 모델 목록:", available_models)
 
@@ -42,7 +77,6 @@ if not selected_model:
     selected_model = flash_models[0] if flash_models else available_models[0]
 
 print(f"최종 연결된 모델: {selected_model}")
-model = genai.GenerativeModel(selected_model)
 # 2. 최근 24시간 뉴스 RSS 수집 함수
 def fetch_google_news(query, limit=5):
     encoded_query = urllib.parse.quote(query)
@@ -97,8 +131,7 @@ prompt = f"""
 """
 
 # 4. LLM 호출 및 파싱
-response = model.generate_content(prompt)
-response_text = response.text.strip()
+response_text = api_generate(selected_model, prompt)
 
 # 코드블록 제거
 if response_text.startswith("```"):
